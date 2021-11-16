@@ -1,3 +1,4 @@
+//go:build mysql
 // +build mysql
 
 // Package mysql is a database adapter for MySQL.
@@ -2801,7 +2802,8 @@ func (a *adapter) CredUpsert(cred *t.Credential) (bool, error) {
 		var done bool
 		err = tx.Get(&done, "SELECT done FROM credentials WHERE synthetic=?", synth)
 		if err == nil {
-			return false, t.ErrDuplicate
+			err = t.ErrDuplicate
+			return false, err
 		}
 		if err != sql.ErrNoRows {
 			return false, err
@@ -2838,7 +2840,8 @@ func (a *adapter) CredUpsert(cred *t.Credential) (bool, error) {
 		cred.CreatedAt, cred.UpdatedAt, cred.Method, cred.Value, synth, userId, cred.Resp, cred.Done)
 	if err != nil {
 		if isDupe(err) {
-			return true, t.ErrDuplicate
+			err = t.ErrDuplicate
+			return true, err
 		}
 		return true, err
 	}
